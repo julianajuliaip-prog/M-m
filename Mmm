@@ -1,0 +1,38 @@
+-- language: Lua, file: mç.lua
+-- baixa a source raw, reescreve as marcas para "mç" e executa
+-- o único ponto que Kai troca é o SOURCE_URL
+
+local SOURCE_URL = "COLE_AQUI_A_URL_RAW_DA_SOURCE"
+
+local BRAND = "mç"
+
+local REPLACEMENTS = {
+    { "ChilliLibrary", BRAND .. "Library" },   -- pasta + paths de save
+    { "Chilli Hub",    BRAND },                 -- título da janela + notificações
+    { "ChilliHub",     BRAND .. "Hub" },        -- globals: Cleanup, LoadStep
+    { "[Chilli] ",     "[" .. BRAND .. "] " },  -- prefixo de warn
+}
+
+local ok, raw = pcall(function()
+    return game:HttpGet(SOURCE_URL)
+end)
+
+if not ok or type(raw) ~= "string" or #raw < 1000 then
+    warn("[mç] falha ao baixar a source de: " .. SOURCE_URL)
+    return
+end
+
+for _, pair in ipairs(REPLACEMENTS) do
+    raw = raw:gsub(pair[1], pair[2])
+end
+
+local fn, err = loadstring(raw, "=" .. BRAND)
+if not fn then
+    warn("[mç] loadstring falhou: " .. tostring(err))
+    return
+end
+
+local ok2, err2 = pcall(fn)
+if not ok2 then
+    warn("[mç] erro ao executar: " .. tostring(err2))
+end
